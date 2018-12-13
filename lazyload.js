@@ -20,7 +20,8 @@ function lazyload(opts) {
   opts = merge({
     'offset': 333,
     'src': 'data-src',
-    'container': false
+    'container': false,
+    'loader': null
   }, opts || {});
 
   if (typeof opts.src === 'string') {
@@ -33,7 +34,11 @@ function lazyload(opts) {
     var src = findRealSrc(elt);
 
     if (src) {
-      elt.src = src;
+      if (opts.loader) {
+        opts.loader(elt, src);
+      } else {
+        elt.src = src;
+      }
     }
 
     elt.setAttribute('data-lzled', true);

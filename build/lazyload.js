@@ -1,4 +1,4 @@
-(function(f){var g;if(typeof window!=='undefined'){g=window}else if(typeof self!=='undefined'){g=self}g.lazyload=f()})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){var g;if(typeof window!=='undefined'){g=window}else if(typeof self!=='undefined'){g=self}g.lazyload=f()})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 (function (global){
 module.exports = lazyload;
 
@@ -22,7 +22,8 @@ function lazyload(opts) {
   opts = merge({
     'offset': 333,
     'src': 'data-src',
-    'container': false
+    'container': false,
+    'loader': null
   }, opts || {});
 
   if (typeof opts.src === 'string') {
@@ -35,7 +36,11 @@ function lazyload(opts) {
     var src = findRealSrc(elt);
 
     if (src) {
-      elt.src = src;
+      if (opts.loader) {
+        opts.loader(elt, src);
+      } else {
+        elt.src = src;
+      }
     }
 
     elt.setAttribute('data-lzled', true);
@@ -121,7 +126,9 @@ var supportsMutationObserver = typeof global.MutationObserver === 'function';
 function inViewport(elt, params, cb) {
   var opts = {
     container: global.document.body,
-    offset: 0
+    offset: 0,
+    debounce: 15,
+    failsafe: 150
   };
 
   if (params === undefined || typeof params === 'function') {
@@ -131,15 +138,33 @@ function inViewport(elt, params, cb) {
 
   var container = opts.container = params.container || opts.container;
   var offset = opts.offset = params.offset || opts.offset;
+  var debounceValue = opts.debounce = params.debounce || opts.debounce;
+  var failsafe = opts.failsafe = params.failsafe || opts.failsafe;
+
+  // ensure backward compatibility with failsafe as boolean
+  if (failsafe === true) {
+    failsafe = 150;
+  } else if(failsafe === false) {
+    failsafe = 0;
+  }
+
+  // failsafe check always needs to be higher than debounceValue
+  if (failsafe > 0 && failsafe < debounceValue) {
+      failsafe = debounceValue + 50;
+  }
 
   for (var i = 0; i < instances.length; i++) {
-    if (instances[i].container === container) {
+    if (
+      instances[i].container === container &&
+      instances[i]._debounce === debounceValue &&
+      instances[i]._failsafe === failsafe
+    ) {
       return instances[i].isInViewport(elt, offset, cb);
     }
   }
 
   return instances[
-    instances.push(createInViewport(container)) - 1
+    instances.push(createInViewport(container, debounceValue, failsafe)) - 1
   ].isInViewport(elt, offset, cb);
 }
 
@@ -168,28 +193,33 @@ function debounce(func, wait, immediate) {
 }
 
 // https://github.com/jquery/sizzle/blob/3136f48b90e3edc84cbaaa6f6f7734ef03775a07/sizzle.js#L708
-var contains = global.document.documentElement.compareDocumentPosition ?
-  function (a, b) {
-    return !!(a.compareDocumentPosition(b) & 16);
-  } :
-  global.document.documentElement.contains ?
+var contains = function() {
+  if (!global.document) {
+    return true;
+  }
+  return global.document.documentElement.compareDocumentPosition ?
     function (a, b) {
-      return a !== b && ( a.contains ? a.contains(b) : false );
+      return !!(a.compareDocumentPosition(b) & 16);
     } :
-    function (a, b) {
-      while (b = b.parentNode) {
-        if (b === a) {
-          return true;
+    global.document.documentElement.contains ?
+      function (a, b) {
+        return a !== b && ( a.contains ? a.contains(b) : false );
+      } :
+      function (a, b) {
+        while (b = b.parentNode) {
+          if (b === a) {
+            return true;
+          }
         }
-      }
-      return false;
-    };
+        return false;
+      };
+}
 
-function createInViewport(container) {
+function createInViewport(container, debounceValue, failsafe) {
   var watches = createWatches();
 
   var scrollContainer = container === global.document.body ? global : container;
-  var debouncedCheck = debounce(watches.checkAll(watchInViewport), 15);
+  var debouncedCheck = debounce(watches.checkAll(watchInViewport), debounceValue);
 
   addEvent(scrollContainer, 'scroll', debouncedCheck);
 
@@ -201,11 +231,13 @@ function createInViewport(container) {
     observeDOM(watches, container, debouncedCheck);
   }
 
-  // failsafe check, every 200ms we check for visible images
+  // failsafe check, every X we check for visible images
   // usecase: a hidden parent containing eleements
   // when the parent becomes visible, we have no event that the children
   // became visible
-  setInterval(debouncedCheck, 150);
+  if (failsafe > 0) {
+    setInterval(debouncedCheck, failsafe);
+  }
 
   function isInViewport(elt, offset, cb) {
     if (!cb) {
@@ -240,6 +272,10 @@ function createInViewport(container) {
   }
 
   function isVisible(elt, offset) {
+    if (!elt) {
+      return false;
+    }
+
     if (!contains(global.document.documentElement, elt) || !contains(global.document.documentElement, container)) {
       return false;
     }
@@ -284,7 +320,9 @@ function createInViewport(container) {
 
   return {
     container: container,
-    isInViewport: isInViewport
+    isInViewport: isInViewport,
+    _debounce: debounceValue,
+    _failsafe: failsafe
   };
 }
 
