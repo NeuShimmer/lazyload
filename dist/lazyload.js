@@ -483,8 +483,15 @@ function lazyload(opt) {
   }
 
   function register(elt) {
-    // unsubscribe onload
+    if (elt instanceof Array || elt instanceof NodeList || elt instanceof HTMLCollection) {
+      Array.prototype.forEach.call(elt, function (e) {
+        return register(e);
+      });
+      return;
+    } // unsubscribe onload
     // needed by IE < 9, otherwise we get another onload when changing the src
+
+
     elt.onload = null;
     elt.removeAttribute('onload'); // https://github.com/vvo/lazyload/issues/62
 
