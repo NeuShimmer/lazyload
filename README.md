@@ -1,25 +1,22 @@
-**NOTE FROM MAINTAINERS**
-This library is still working but not actively maintained, we recommend you use https://github.com/ApoorvSaxena/lozad.js first rather than this one.
-**/NOTE FROM MAINTAINERS**
-
-# lazyload [![Dependency Status](http://img.shields.io/david/vvo/lazyload.svg?style=flat-square)](https://david-dm.org/vvo/lazyload) [![devDependency Status](http://img.shields.io/david/dev/vvo/lazyload.svg?style=flat-square)](https://david-dm.org/vvo/lazyload#info=devDependencies)
-
-Lazyload images, iframes or any src* element until they are visible in the viewport.
-
-[![Selenium Test Status](https://saucelabs.com/browser-matrix/lazyloadvvo.svg)](https://saucelabs.com/u/lazyloadvvo)
+# lazyload
 
 ## Install
 
 ```shell
-npm install lazyloadjs --save
+npm i shimmer-lazyload
+// or
+yarn add shimmer-lazyload
 ```
 
-Also available for `<script>` users:
-  - https://cdnjs.com/libraries/lazyloadjs
+Or you can use `script` tag:
 
-## Simple example
+```html
+<script src="https://unpkg.com/shimmer-lazyload@^4.0/dist/lazyload.min.js"></script>
+```
 
-See more [examples](examples/).
+## Usage
+
+### Simple example
 
 ```html
 <!DOCTYPE html>
@@ -28,58 +25,37 @@ See more [examples](examples/).
     <title>lazyload</title>
   </head>
   <body>
-    <script src="lazyload.min.js"></script>
+    <script src="https://unpkg.com/shimmer-lazyload@^4.0/dist/lazyload.min.js"></script>
 
     <!-- A lot of content -->
     <!-- A lot of content -->
 
     <img
+      id="img"
       data-src="real/image/src.jpg"
-      src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
-      onload="lzld(this)">
+      src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+
+    <script>
+      var lzld = lazyload();
+      lzld(document.getElementById(img));
+    </script>
   </body>
 </html>
 ```
 
-Make sure your webpage is in [standards mode](http://en.wikipedia.org/wiki/Document_Type_Declaration#HTML5_DTD-less_DOCTYPE).
+### API
 
-Viewport computing is badly handled by browsers when in [quirksmode](http://en.wikipedia.org/wiki/Quirks_mode).
-
-If you do not want to use a data-uri as your src, you can also use the provided [b.gif](b.gif) which is
-the [tiniest gif ever](http://probablyprogramming.com/2009/03/15/the-tiniest-gif-ever).
-
-On most websites, you better let the first top images not bound to lzld method.
-So that they shows really fast.
-
-## Advanced example
-
-`lazyloadjs` is an npm module and is compatible with browserify.
-
-```js
-global.myLazyload = require('lazyloadjs')();
-```
-
-```html
-<img
-  data-src="real/image/src.jpg"
-  src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
-  onload="myLazyload(this)">
-```
-
-Per default, `lazyloadjs` exposes the `lzld` instance on the global
-object. So that in most cases, you just need to require it in your webpage.
-
-## API
-
-## var lzld = lazyload([opts])
+**var lzld = lazyload([opts])**
 
 `opts` is an object with these defaults:
 
 ```js
 {
-  container: document.body,
-  offset: 333,
-  src: 'data-src' // or function(elt) { return customSrc }
+  'offset': 200,
+  'src': 'data-src',
+  'container': false,
+  'loader': null,
+  'replaceGetAttribute': false
 }
 ```
 
@@ -88,15 +64,19 @@ object. So that in most cases, you just need to require it in your webpage.
 `opts.offset` is a length in pixels used to compute when an element will
 soon be visible. So that you load it just before it becomes visible.
 
-`src` is the attribute name storing the real src of the element to load.
-
-`src` can also be a `function`, so that you can have your custom `src` computing algorithm.
+`opts.src` is the attribute name storing the real src of the element to load, or it can also be a `function`, so that you can have your custom `src` computing algorithm.
 You can use it to [lazyload High DPI/retina images](examples/hidpi.html).
 
-## Launching the examples
+`opts.loader` is the `function` that you can custom the load behaviour, for example, load it into "background-image".
+You can use it to [lazyload High DPI/retina images](examples/hidpi.html).
 
-```shell
-npm run examples
+`opts.replaceGetAttribute` replace the default getAttribute or not.
+
+Then, add the elements to lazyload:
+
+```javascript
+lzld(document.getElementById('image'));
+lzld(document.querySelectorAll('img'));
 ```
 
 ## Developing
@@ -105,52 +85,25 @@ Launch the dev server:
 
 ```shell
 npm run dev
+// or
+yarn dev
 ```
-
-Browse to [http://localhost:8080/__zuul](http://localhost:8080/__zuul).
-
-[Tests](test/) are written with [mocha](https://github.com/visionmedia/mocha).
 
 ## Building
 
-We provide a pre-built version of `lazyloadjs` in `build/lazyload.min.js`.
+We provide a pre-built version of `lazyload` in `dist/lazyload.min.js`.
 
-But you can build your own:
+You can build your own:
 
 ```shell
 npm run build
+// or
+yarn build
 ```
 
-You get the build in `build/lazyload.min.js`.
-
-Please consider using [browserify](https://github.com/substack/node-browserify).
-
-## Sites using lazyload
-
-Tens of millions of pageviews are served each month using this project:
-
-* [fasterize.com](http://fasterize.com) `lazyload` was first developed at fasterize (WPO solution)
-* [lemonde.fr](http://www.lemonde.fr)
-* [pluzz.francetv.fr](http://pluzz.francetv.fr)
-* [pcinpact.com](http://www.pcinpact.com)
-* [elpais.com](http://www.elpais.com)
-* [playtv.fr](http://playtv.fr)
-* [voyages-sncf.com](http://www.voyages-sncf.com)
-* [rue89.com](http://www.rue89.com)
-* [flipkart.com](http://www.flipkart.com/)
-* [clubic.com](http://clubic.com)
-* [achetezfacile.com](http://www.achetezfacile.com/)
-* [mapado.com](http://www.mapado.com/)
-* [decitre.fr](http://www.decitre.fr/)
-* [base-orb.fr](http://www.base-orb.fr/)
-* [nearbuy.com](http://www.nearbuy.com/)
-* [winni.in](https://www.winni.in)
-
-.. And many unlisted websites, [add yours](https://github.com/vvo/lazyload/edit/master/README.md)!
+You get the build in `dist/lazyload.min.js`.
 
 ## Licence
-
-Also see [LICENCE.fasterize](LICENCE.fasterize)
 
 (The MIT Licence)
 

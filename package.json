@@ -1,5 +1,5 @@
 {
-  "name": "lazyload",
+  "name": "shimmer-lazyload",
   "version": "4.0.0",
   "description": "Image lazy loading",
   "main": "./src/index.js",

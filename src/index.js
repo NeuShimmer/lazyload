@@ -44,6 +44,10 @@ function lazyload(opt) {
   }
 
   function register(elt) {
+    if (elt instanceof Array || elt instanceof NodeList || elt instanceof HTMLCollection) {
+      Array.prototype.forEach.call(elt, e => register(e));
+      return;
+    }
     // unsubscribe onload
     // needed by IE < 9, otherwise we get another onload when changing the src
     elt.onload = null;
