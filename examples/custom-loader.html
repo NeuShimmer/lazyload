@@ -1,0 +1,21 @@
+<!doctype html>
+<title>lazyloading images</title>
+<script src="../dist/lazyload.min.js"></script>
+
+<h1>Custom loader example</h1>
+<h2>scroll for more</h2>
+
+<div style="margin-top:2000px"></div>
+
+<div id="section-1" style="height:500px;width:500px;" data-src="img/01.jpg"></div>
+
+<script>
+var lzld = lazyload({
+  'offset': 50,
+  'src': 'data-src',
+  'loader': function(el, src) {
+    el.style.backgroundImage = "url(" + src + ")";
+  }
+});
+lzld(document.getElementById('section-1'));
+</script>

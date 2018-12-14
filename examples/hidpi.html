@@ -1,15 +1,6 @@
 <!doctype html>
 <title>lazyloading images</title>
-<script src="../build/lazyload.min.js"></script>
-<script>
-  var lazyHd = lazyload({src: hidpi});
-
-  function hidpi(img) {
-    if(window.devicePixelRatio > 1) {
-      return img.getAttribute('data-src-hd');
-    }
-  }
-</script>
+<script src="../dist/lazyload.min.js"></script>
 
 <h1>simple images example</h1>
 <h2>scroll for more</h2>
@@ -17,7 +8,19 @@
 <div style="margin-top:2000px"></div>
 
 <img
+  id="img"
   data-src-hd="img/hd.jpg"
-  src="img/lowhd.jpg"
-  onload="lazyHd(this)">
+  src="img/lowhd.jpg">
   HEY
+
+<script>
+var lzld = lazyload({
+  'offset': 50,
+  'src': function(img) {
+    if (window.devicePixelRatio > 1) {
+      return img.getAttribute('data-src-hd');
+    }
+  }
+});
+lzld(document.getElementById('img'));
+</script>
