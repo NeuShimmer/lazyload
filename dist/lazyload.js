@@ -427,33 +427,34 @@ module.exports = g;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(global) {module.exports = lazyload;
+"use strict";
 
-var inViewport = __webpack_require__(/*! in-viewport */ "./node_modules/in-viewport/in-viewport.js");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _inViewport = _interopRequireDefault(__webpack_require__(/*! in-viewport */ "./node_modules/in-viewport/in-viewport.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var lazyAttrs = ['data-src'];
-global.lzld = lazyload(); // Provide libs using getAttribute early to get the good src
-// and not the fake data-src
+var replacedGetAttribute = [];
 
-replaceGetAttribute('Image');
-replaceGetAttribute('IFrame');
-
-function registerLazyAttr(attr) {
-  if (indexOf.call(lazyAttrs, attr) === -1) {
-    lazyAttrs.push(attr);
-  }
-}
-
-function lazyload(opts) {
-  opts = merge({
-    'offset': 333,
+function lazyload(opt) {
+  var opts = Object.assign({
+    'offset': 200,
     'src': 'data-src',
     'container': false,
-    'loader': null
-  }, opts || {});
+    'loader': null,
+    'replaceGetAttribute': false
+  }, opt || {});
 
   if (typeof opts.src === 'string') {
-    registerLazyAttr(opts.src);
+    if (lazyAttrs.indexOf(opts.src) === -1) {
+      lazyAttrs.push(opts.src);
+    }
   }
 
   var elts = [];
@@ -470,7 +471,7 @@ function lazyload(opts) {
     }
 
     elt.setAttribute('data-lzled', true);
-    elts[indexOf.call(elts, elt)] = null;
+    elts[elts.indexOf(elt)] = null;
   }
 
   function findRealSrc(elt) {
@@ -490,24 +491,25 @@ function lazyload(opts) {
     elt.onerror = null;
     elt.removeAttribute('onerror');
 
-    if (indexOf.call(elts, elt) === -1) {
-      inViewport(elt, opts, show);
+    if (elts.indexOf(elt) === -1) {
+      (0, _inViewport.default)(elt, opts, show);
+      replaceGetAttribute(elt);
     }
   }
 
   return register;
 }
 
-function replaceGetAttribute(elementName) {
-  var fullname = 'HTML' + elementName + 'Element';
+function replaceGetAttribute(elt) {
+  var elementName = elt.__proto__;
 
-  if (fullname in global === false) {
+  if (replacedGetAttribute.indexOf(elementName) !== -1) {
     return;
   }
 
-  var original = global[fullname].prototype.getAttribute;
+  var original = elementName.getAttribute;
 
-  global[fullname].prototype.getAttribute = function (name) {
+  elementName.getAttribute = function (name) {
     if (name === 'src') {
       var realSrc;
 
@@ -528,23 +530,9 @@ function replaceGetAttribute(elementName) {
   };
 }
 
-function merge(defaults, opts) {
-  for (var name in defaults) {
-    if (opts[name] === undefined) {
-      opts[name] = defaults[name];
-    }
-  }
-
-  return opts;
-} // http://webreflection.blogspot.fr/2011/06/partial-polyfills.html
-
-
-function indexOf(value) {
-  for (var i = this.length; i-- && this[i] !== value;) {}
-
-  return i;
-}
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+var _default = lazyload;
+exports.default = _default;
+module.exports = exports["default"];
 
 /***/ })
 

@@ -1,37 +1,27 @@
-module.exports = lazyload;
+import inViewport from 'in-viewport';
 
-var inViewport = require('in-viewport');
-var lazyAttrs = ['data-src'];
+const lazyAttrs = ['data-src'];
+const replacedGetAttribute = [];
 
-global.lzld = lazyload();
-
-// Provide libs using getAttribute early to get the good src
-// and not the fake data-src
-replaceGetAttribute('Image');
-replaceGetAttribute('IFrame');
-
-function registerLazyAttr(attr) {
-  if (indexOf.call(lazyAttrs, attr) === -1) {
-    lazyAttrs.push(attr);
-  }
-}
-
-function lazyload(opts) {
-  opts = merge({
-    'offset': 333,
+function lazyload(opt) {
+  const opts = Object.assign({
+    'offset': 200,
     'src': 'data-src',
     'container': false,
-    'loader': null
-  }, opts || {});
+    'loader': null,
+    'replaceGetAttribute': false
+  }, opt || {});
 
   if (typeof opts.src === 'string') {
-    registerLazyAttr(opts.src);
+    if (lazyAttrs.indexOf(opts.src) === -1) {
+      lazyAttrs.push(opts.src);
+    }
   }
 
-  var elts = [];
+  const elts = [];
 
   function show(elt) {
-    var src = findRealSrc(elt);
+    const src = findRealSrc(elt);
 
     if (src) {
       if (opts.loader) {
@@ -42,7 +32,7 @@ function lazyload(opts) {
     }
 
     elt.setAttribute('data-lzled', true);
-    elts[indexOf.call(elts, elt)] = null;
+    elts[elts.indexOf(elt)] = null;
   }
 
   function findRealSrc(elt) {
@@ -63,22 +53,23 @@ function lazyload(opts) {
     elt.onerror = null;
     elt.removeAttribute('onerror');
 
-    if (indexOf.call(elts, elt) === -1) {
+    if (elts.indexOf(elt) === -1) {
       inViewport(elt, opts, show);
+      replaceGetAttribute(elt);
     }
   }
 
   return register;
 }
 
-function replaceGetAttribute(elementName) {
-  var fullname = 'HTML' + elementName + 'Element';
-  if (fullname in global === false) {
+function replaceGetAttribute(elt) {
+  const elementName = elt.__proto__;
+  if (replacedGetAttribute.indexOf(elementName) !== -1) {
     return;
   }
 
-  var original = global[fullname].prototype.getAttribute;
-  global[fullname].prototype.getAttribute = function(name) {
+  const original = elementName.getAttribute;
+  elementName.getAttribute = function(name) {
     if (name === 'src') {
       var realSrc;
       for (var i = 0, max = lazyAttrs.length; i < max; i++) {
@@ -97,18 +88,4 @@ function replaceGetAttribute(elementName) {
   };
 }
 
-function merge(defaults, opts) {
-  for (var name in defaults) {
-    if (opts[name] === undefined) {
-      opts[name] = defaults[name];
-    }
-  }
-
-  return opts;
-}
-
-// http://webreflection.blogspot.fr/2011/06/partial-polyfills.html
-function indexOf(value) {
-  for (var i = this.length; i-- && this[i] !== value;) {}
-  return i;
-}
+export default lazyload;
