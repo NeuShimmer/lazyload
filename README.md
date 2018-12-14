@@ -1,5 +1,9 @@
 # lazyload
 
+[![GitHub release](https://img.shields.io/github/release/NeuShimmer/lazyload.svg?style=flat-square)](https://github.com/NeuShimmer/lazyload/releases)
+[![license](https://img.shields.io/github/license/NeuShimmer/lazyload.svg?style=flat-square)](https://github.com/NeuShimmer/lazyload/blob/master/LICENSE)
+[![license](https://img.shields.io/npm/dt/shimmer-lazyload.svg?style=flat-square)](https://www.npmjs.com/package/shimmer-lazyload)
+
 ## Install
 
 ```shell
@@ -67,8 +71,7 @@ soon be visible. So that you load it just before it becomes visible.
 `opts.src` is the attribute name storing the real src of the element to load, or it can also be a `function`, so that you can have your custom `src` computing algorithm.
 You can use it to [lazyload High DPI/retina images](examples/hidpi.html).
 
-`opts.loader` is the `function` that you can custom the load behaviour, for example, load it into "background-image".
-You can use it to [lazyload High DPI/retina images](examples/hidpi.html).
+`opts.loader` is the `function` that you can custom the load behaviour, for example, load it into "background-image". see [examples/custom-loader.html](examples/custom-loader.html).
 
 `opts.replaceGetAttribute` replace the default getAttribute or not.
 
