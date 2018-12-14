@@ -1,0 +1,44 @@
+<!doctype html>
+<title>lazyloading images</title>
+<script src="../dist/lazyload.min.js"></script>
+
+<h1>mulit lazyload images example</h1>
+<h2>scroll for more</h2>
+
+<div style="margin-top:2000px"></div>
+
+<div id="section-1">
+  <img
+    id="img1"
+    src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+    data-src="img/01.jpg" />
+  <img
+    id="img2"
+    src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+    data-src="img/02.jpg" />
+</div>
+
+<div id="section-2">
+  <img
+    id="img3"
+    src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+    data-my-src="img/01.jpg" />
+  <img
+    id="img4"
+    src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+    data-my-src="img/02.jpg" />
+</div>
+
+<script>
+var lzld = lazyload({
+  'offset': 300,
+  'src': 'data-src'
+});
+lzld(document.getElementById('img1'));
+lzld(document.getElementById('img2'));
+var lzld2 = lazyload({
+  'offset': 0,
+  'src': 'data-my-src'
+});
+lzld2(document.querySelectorAll('#section-2 > img'));
+</script>
