@@ -439,10 +439,10 @@ var _inViewport = _interopRequireDefault(__webpack_require__(/*! in-viewport */ 
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var lazyAttrs = ['data-src'];
 var replacedGetAttribute = [];
 
 function lazyload(opt) {
+  var lazyAttrs = ['data-src'];
   var opts = Object.assign({
     'offset': 200,
     'src': 'data-src',
@@ -460,6 +460,10 @@ function lazyload(opt) {
   var elts = [];
 
   function show(elt) {
+    if (elt.getAttribute('data-lzled')) {
+      return;
+    }
+
     var src = findRealSrc(elt);
 
     if (src) {
@@ -500,7 +504,10 @@ function lazyload(opt) {
 
     if (elts.indexOf(elt) === -1) {
       (0, _inViewport.default)(elt, opts, show);
-      replaceGetAttribute(elt);
+
+      if (opts.replaceGetAttribute) {
+        replaceGetAttribute(elt);
+      }
     }
   }
 
@@ -508,15 +515,15 @@ function lazyload(opt) {
 }
 
 function replaceGetAttribute(elt) {
-  var elementName = elt.__proto__;
+  var elementPrototype = elt.__proto__;
 
-  if (replacedGetAttribute.indexOf(elementName) !== -1) {
+  if (replacedGetAttribute.indexOf(elementPrototype) !== -1) {
     return;
   }
 
-  var original = elementName.getAttribute;
+  var original = elementPrototype.getAttribute;
 
-  elementName.getAttribute = function (name) {
+  elementPrototype.getAttribute = function (name) {
     if (name === 'src') {
       var realSrc;
 
@@ -535,6 +542,8 @@ function replaceGetAttribute(elt) {
 
     return original.call(this, name);
   };
+
+  replacedGetAttribute.push(elementPrototype);
 }
 
 var _default = lazyload;

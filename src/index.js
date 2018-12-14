@@ -1,9 +1,10 @@
 import inViewport from 'in-viewport';
 
-const lazyAttrs = ['data-src'];
 const replacedGetAttribute = [];
 
 function lazyload(opt) {
+  const lazyAttrs = ['data-src'];
+
   const opts = Object.assign({
     'offset': 200,
     'src': 'data-src',
@@ -21,6 +22,10 @@ function lazyload(opt) {
   const elts = [];
 
   function show(elt) {
+    if (elt.getAttribute('data-lzled')) {
+      return;
+    }
+
     const src = findRealSrc(elt);
 
     if (src) {
@@ -59,7 +64,9 @@ function lazyload(opt) {
 
     if (elts.indexOf(elt) === -1) {
       inViewport(elt, opts, show);
-      replaceGetAttribute(elt);
+      if (opts.replaceGetAttribute) {
+        replaceGetAttribute(elt);
+      }
     }
   }
 
@@ -67,13 +74,13 @@ function lazyload(opt) {
 }
 
 function replaceGetAttribute(elt) {
-  const elementName = elt.__proto__;
-  if (replacedGetAttribute.indexOf(elementName) !== -1) {
+  const elementPrototype = elt.__proto__;
+  if (replacedGetAttribute.indexOf(elementPrototype) !== -1) {
     return;
   }
 
-  const original = elementName.getAttribute;
-  elementName.getAttribute = function(name) {
+  const original = elementPrototype.getAttribute;
+  elementPrototype.getAttribute = function(name) {
     if (name === 'src') {
       var realSrc;
       for (var i = 0, max = lazyAttrs.length; i < max; i++) {
@@ -90,6 +97,8 @@ function replaceGetAttribute(elt) {
     // because we use getAttribute(opts.src)
     return original.call(this, name);
   };
+
+  replacedGetAttribute.push(elementPrototype);
 }
 
 export default lazyload;
