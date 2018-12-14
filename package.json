@@ -1,23 +1,34 @@
 {
-  "name": "lazyloadjs",
-  "version": "3.2.2",
+  "name": "lazyload",
+  "version": "4.0.0",
   "description": "Image lazy loading",
-  "main": "./lazyload.js",
+  "main": "./src/index.js",
   "scripts": {
-    "build": "browserify ./lazyload.js -s lazyload -p deumdify > build/lazyload.js && ccjs build/lazyload.js > build/lazyload.min.js",
-    "watch": "watchify ./lazyload.js -d -s lazyload -p deumdify -o build/lazyload.min.js -v"
+    "build": "webpack --mode=development && webpack --mode=production",
+    "build:prod": "webpack --mode=production",
+    "build:dev": "webpack --mode=development",
+    "dev": "webpack --progress --colors --watch --env dev"
   },
-  "repository": "vvo/lazyload",
-  "author": "Vincent Voyer <vincent.voyer@gmail.com> (http://github.com/vvo)",
+  "repository": "NeuShimmer/lazyload",
+  "author": "Shimmer Network Studio",
   "license": "MIT",
   "dependencies": {
     "in-viewport": "^3.4.1"
   },
   "devDependencies": {
-    "browserify": "^12.0.1",
-    "closurecompiler": "^1.5.2",
-    "deumdify": "^1.2.2",
-    "merge": "^1.2.0",
-    "watchify": "^3.6.1"
+    "@babel/cli": "^7.0.0-beta.51",
+    "@babel/core": "^7.0.0-beta.51",
+    "@babel/preset-env": "^7.0.0-beta.51",
+    "babel-eslint": "^8.0.3",
+    "babel-loader": "^8.0.0-beta.4",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-env": "^7.0.0-beta.3",
+    "babel-register": "^7.0.0-beta.3",
+    "cross-env": "^5.2.0",
+    "eslint": "^5.0.1",
+    "eslint-loader": "^2.0.0",
+    "uglifyjs-webpack-plugin": "^1.3.0",
+    "webpack": "^4.12.2",
+    "webpack-cli": "^3.0.8"
   }
 }
